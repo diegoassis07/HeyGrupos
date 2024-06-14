@@ -10,8 +10,19 @@ import * as S from "./styled";
 export default function SignIn() {
   const navigation = useNavigation();
   const [secureTextEntry, setSecureTextEntry] = useState(false);
-  const { control, errors, handleSubmit,setValue } = HookFormYup("signIn");
-  const { SignIn, loading } = useGlobal();
+  const { control, errors, handleSubmit, setValue } = HookFormYup("signIn");
+  const { SignIn, loading, handleErrorsCredentials } = useGlobal();
+
+  const clearInputs = () => {
+    setValue("email", "");
+    setValue("password", "");
+  };
+
+  const handleSignIn = (data) => {
+    SignIn(data).catch((error) =>
+      handleErrorsCredentials(error.messagem, clearInputs)
+    );
+  };
 
   return (
     <S.Container>
@@ -84,7 +95,7 @@ export default function SignIn() {
           </S.ContentError>
         )}
 
-        <S.Button onPress={handleSubmit(SignIn)}>
+        <S.Button onPress={handleSubmit(handleSignIn)}>
           {loading ? (
             <Native.ActivityIndicator size={29} color="#FFF" />
           ) : (

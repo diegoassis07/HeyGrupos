@@ -47,6 +47,7 @@ export const AuthProvider = ({ children }) => {
         [
           {
             text: "OK",
+            onPress: () => clearInputs(),
           },
         ],
         { cancelable: false }
@@ -85,9 +86,8 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
       return userCredentials;
     } catch (error) {
-      handleErrorsCredentials(error);
       setLoading(false);
-      console.log("ERROR LOGAR USUARIO:", error);
+      throw new Error(error.code);
     }
   };
 

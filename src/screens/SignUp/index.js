@@ -16,15 +16,15 @@ export default function SignUp() {
   const { control, handleSubmit, errors, setValue } = HookFormYup("signUp");
   const { SignUp, loading, handleErrorsCredentials } = useGlobal();
 
-  const testClearInputs = () => {
+  const clearInputs = () => {
     setValue("nome", "");
     setValue("email", "");
     setValue("password", "");
   };
 
-  const test = (data) => {
+  const handleSignUP = (data) => {
     SignUp(data).catch((error) => {
-      handleErrorsCredentials(error.message, testClearInputs);
+      handleErrorsCredentials(error.message, clearInputs);
     });
   };
 
@@ -128,7 +128,7 @@ export default function SignUp() {
           </S.ContentError>
         )}
 
-        <S.Button onPress={handleSubmit(test)}>
+        <S.Button onPress={handleSubmit(handleSignUP)}>
           {loading ? (
             <Native.ActivityIndicator size={29} color="#FFF" />
           ) : (
