@@ -5,7 +5,7 @@ import { HookFormYup } from "../../components/hook-form-yup";
 import { Controller } from "react-hook-form";
 import { useGlobal } from "./../../contexts/contextApi";
 import * as Native from "react-native";
-import * as S from "./styled";
+import * as S from "./style";
 
 export default function SignIn() {
   const navigation = useNavigation();

@@ -7,7 +7,7 @@ import { HookFormYup } from "../../components/hook-form-yup";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import * as Native from "react-native";
-import * as S from "./styled";
+import * as S from "./style";
 
 export default function SignUp() {
   const navigation = useNavigation();
