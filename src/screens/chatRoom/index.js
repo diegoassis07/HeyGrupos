@@ -4,6 +4,7 @@ import { Feather } from "@expo/vector-icons";
 import { auth } from "./../../config/firebaseConnection";
 import { useGlobal } from "../../contexts/contextApi";
 import { useState, useEffect } from "react";
+import { useNavigation } from "@react-navigation/native";
 import FabButton from "../../components/FabButton";
 import ModalNewRoom from "../../components/ModalNewRoom";
 import ChatList from "../../components/ChatList";
@@ -16,11 +17,12 @@ export default function ChatRoom() {
   const [updateScreen, setUpdateScreen] = useState(false);
   const { LogOut, getChatRoom, threads, deleteGroup, loading } = useGlobal();
   const isFocused = useIsFocused();
+  const navigation = useNavigation();
 
   //verificando se tem usuario logado
   useEffect(() => {
-    const hasUser = auth.currentUser ? auth.currentUser.toJSON() : null;
-    setUser(hasUser);
+    const HAS_USER = auth.currentUser ? auth.currentUser.toJSON() : null;
+    setUser(HAS_USER);
   }, [isFocused]);
 
   useEffect(() => {
@@ -42,13 +44,13 @@ export default function ChatRoom() {
       <S.HeaderChatRoom>
         <S.HeaderContent>
           {user && (
-            <S.ButtonBack onPress={() => LogOut()}>
+            <Native.TouchableOpacity onPress={() => LogOut()}>
               <AntDesign name="arrowleft" size={30} color="#FFF" />
-            </S.ButtonBack>
+            </Native.TouchableOpacity>
           )}
           <S.Title>Grupos</S.Title>
         </S.HeaderContent>
-        <S.Search>
+        <S.Search onPress={() => navigation.navigate("Search")}>
           <Feather name="search" size={29} color="#FFF" />
         </S.Search>
       </S.HeaderChatRoom>

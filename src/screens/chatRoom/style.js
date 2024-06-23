@@ -24,10 +24,6 @@ export const HeaderContent = styled.View`
   gap: 10px;
 `;
 
-export const ButtonBack = styled.TouchableOpacity`
-  /* margin-right: 15px; */
-`;
-
 export const Title = styled.Text`
   font-size: 30px;
   font-family: sans-serif;

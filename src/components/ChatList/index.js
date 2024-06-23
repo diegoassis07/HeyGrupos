@@ -1,4 +1,5 @@
 import { useNavigation } from "@react-navigation/native";
+import * as Native from "react-native";
 import * as S from "./style";
 
 export default function ChatList({ data, deleteRoom, userStatus }) {
@@ -12,8 +13,12 @@ export default function ChatList({ data, deleteRoom, userStatus }) {
       navigation.navigate("SignIn");
     }
   };
+
   return (
-    <S.Container onPress={openChat} onLongPress={() => deleteRoom()}>
+    <Native.TouchableOpacity
+      onPress={openChat}
+      onLongPress={() => deleteRoom()}
+    >
       <S.Row>
         <S.Content>
           <S.Header>
@@ -24,6 +29,6 @@ export default function ChatList({ data, deleteRoom, userStatus }) {
           </S.ContentText>
         </S.Content>
       </S.Row>
-    </S.Container>
+    </Native.TouchableOpacity>
   );
 }

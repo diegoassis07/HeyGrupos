@@ -4,13 +4,14 @@ import SignIn from "./../screens/SignIn";
 import SignUp from "./../screens/SignUp";
 import ChatRoom from "./../screens/chatRoom";
 import Chat from "./../screens/Chat";
+import Search from "./../screens/Search";
 
 const Stack = createStackNavigator();
+
 const headerTitleStyle = {
   fontSize: 23,
-  fontWeight: 700,
+  fontWeight: "bold",
   fontFamily: "sans-serif",
-  right: 5,
 };
 const headerStyle = {
   elevation: 10,
@@ -48,7 +49,18 @@ export const AppRoutes = () => {
         component={Chat}
         options={({ route }) => ({
           title: route.params?.thread?.name,
+          headerTitleStyle: headerTitleStyle,
+          headerStyle: headerStyle,
         })}
+      />
+      <Stack.Screen
+        name="Search"
+        component={Search}
+        options={{
+          headerTitle: "Procurando algum grupo?",
+          headerTitleStyle: headerTitleStyle,
+          headerStyle: headerStyle,
+        }}
       />
     </Stack.Navigator>
   );

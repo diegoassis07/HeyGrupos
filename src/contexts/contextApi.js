@@ -141,7 +141,7 @@ export const AuthProvider = ({ children }) => {
       });
 
       await addDoc(collection(db, "MESSAGE_THREADS", docRef.id, "MESSAGES"), {
-        text: `Grupo ${roomName} criado. Bem vindo(a)!`,
+        textSystem: `Grupo ${roomName} criado. Bem vindo(a)!`,
         createdAt: new Date(),
         system: true,
       });
@@ -267,9 +267,10 @@ export const AuthProvider = ({ children }) => {
         createChatRoom,
         getChatRoom,
         threads,
+        setThreads,
         limitGroups,
         deleteGroup,
-        currentUser
+        currentUser,
       }}
     >
       {children}

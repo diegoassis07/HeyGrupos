@@ -3,50 +3,48 @@ import ChatMessage from "./../../components/ChatMessage";
 import { auth, db } from "./../../config/firebaseConnection";
 import {
   collection,
-  getDocs,
   onSnapshot,
-  query,
-  where,
   addDoc,
-  updateDoc,
+  orderBy,
   doc,
+  updateDoc,
+  query,
+  Timestamp,
 } from "firebase/firestore";
 import { Feather } from "@expo/vector-icons";
 import * as S from "./style";
 import * as Native from "react-native";
 import { useGlobal } from "../../contexts/contextApi";
 
-export default function Chat() {
+export default function Chat({ route }) {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
   const user = auth.currentUser.toJSON();
   const { currentUser } = useGlobal();
+  const CURRENT_THREAD = route.params?.thread; // coleção do lastMessage
 
-  //pegando as mensagens em tempo real
+  // pegando as mensagens em tempo real
   const getGroups = useCallback(async () => {
-    const querySnapshot = await getDocs(collection(db, "MESSAGE_THREADS"));
-    let threadId = null;
-    querySnapshot.forEach((doc) => {
-      if (doc.data().owner === user.uid) {
-        threadId = doc.id;
-      }
-    });
-    if (!threadId) {
+    if (!CURRENT_THREAD._id) {
       console.error("Nenhum tópico encontrado para o usuário atual.");
       return;
     }
+    console.log("Aqqq");
 
     const unsubscribe = onSnapshot(
-      collection(db, "MESSAGE_THREADS", threadId, "MESSAGES"),
-      (querySnapshot2) => {
+      query(
+        collection(db, "MESSAGE_THREADS", CURRENT_THREAD._id, "MESSAGES"),
+        orderBy("createdAt", "asc")
+      ),
+      (querySnapshot) => {
         let messages = [];
         let data = [];
-        querySnapshot2.forEach((doc) => {
+        querySnapshot.forEach((doc) => {
           data = doc.data();
           messages.push({ id: doc.id, ...data });
         });
 
-        setMessages(messages);
+        setMessages(messages.reverse());
         if (!data.system) {
           data.user = {
             ...data.user,
@@ -60,65 +58,71 @@ export default function Chat() {
     );
 
     return unsubscribe;
-  }, [user.uid]);
+  }, [user.uid === CURRENT_THREAD._id]);
+
+  const addNewMessageToThread = async () => {
+    try {
+      const MESSAGE_TO_THREAD = {
+        text: inputMessage,
+        createdAt: Timestamp.fromDate(new Date()),
+        user: {
+          id: user.uid,
+          displayName: currentUser?.displayName,
+        },
+      };
+
+      const COLLECTION_REF_MESSAGES = collection(
+        db,
+        "MESSAGE_THREADS",
+        CURRENT_THREAD._id,
+        "MESSAGES"
+      );
+
+      await addDoc(COLLECTION_REF_MESSAGES, MESSAGE_TO_THREAD);
+    } catch (error) {
+      console.error("Erro no add New", error);
+    }
+  };
+
+  const updateLatestMessageInToThread = async () => {
+    const DOC_REF_TO_UPDATE = doc(db, "MESSAGE_THREADS", CURRENT_THREAD._id);
+
+    const LATEST_MESSAGE = {
+      lastMessage: {
+        text: inputMessage,
+        createdAt: Timestamp.fromDate(new Date()),
+      },
+    };
+
+    await updateDoc(DOC_REF_TO_UPDATE, LATEST_MESSAGE);
+  };
+
+  const handleSendNewMessage = async () => {
+    if (inputMessage === "") return;
+    setInputMessage("");
+    Native.Keyboard.dismiss();
+
+    try {
+      if (!CURRENT_THREAD) return;
+
+      await Promise.all([
+        addNewMessageToThread(),
+        updateLatestMessageInToThread(),
+      ]);
+    } catch (error) {
+      console.error("Error ao enviar mensagens", error);
+    }
+  };
 
   useEffect(() => {
     const unsubscribe = getGroups();
 
     return () => {
-      if (unsubscribe) {
-        unsubscribe;
+      if (unsubscribe && typeof unsubscribe === "function") {
+        unsubscribe();
       }
     };
   }, [getGroups]);
-
-  const handleSend = async () => {
-    if (inputMessage === "") return;
-
-    try {
-      const querySnapshot = await getDocs(collection(db, "MESSAGE_THREADS"));
-      let threadId = null;
-
-      // Encontrar o thread do usuário atual
-      querySnapshot.forEach((doc) => {
-        if (doc.data().owner === user.uid) {
-          threadId = doc.id;
-        }
-      });
-
-      // Verificar se um threadId foi encontrado
-      if (!threadId) {
-        console.log("Nenhum thread encontrado para o usuário atual.");
-        return;
-      }
-      // Adicionar uma nova mensagem ao thread
-      const docRef = await addDoc(
-        collection(db, "MESSAGE_THREADS", threadId, "MESSAGES"),
-        {
-          text: inputMessage,
-          createdAt: new Date(),
-          user: {
-            id: user.uid,
-            displayName: currentUser?.displayName,
-          },
-        }
-      );
-
-      // Atualizar a última mensagem no thread
-      const updateMessage = doc(db, "MESSAGE_THREADS", threadId);
-      await updateDoc(updateMessage, {
-        lastMessage: {
-          text: inputMessage,
-          createdAt: new Date(),
-        },
-      });
-
-      // Limpar o inputMessage após o envio
-      setInputMessage("");
-    } catch (error) {
-      console.log("Error ao enviar mensagens", error);
-    }
-  };
 
   return (
     <Native.SafeAreaView
@@ -139,12 +143,12 @@ export default function Chat() {
           <S.Input
             placeholder="Digite sua mensagem..."
             value={inputMessage}
-            onChangeText={(text) => setInputMessage(text)}
+            onChangeText={(t) => setInputMessage(t)}
             multiline={true}
             autoCorrect={false}
           />
         </S.ContentInput>
-        <Native.TouchableOpacity onPress={handleSend}>
+        <Native.TouchableOpacity onPress={async () => handleSendNewMessage()}>
           <S.ContainerIcon>
             <Feather name="send" size={22} color="#FFF" />
           </S.ContainerIcon>

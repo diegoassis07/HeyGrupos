@@ -1,6 +1,5 @@
 import styled from "styled-components/native";
 
-export const Container = styled.TouchableOpacity``;
 export const Row = styled.View`
   padding-left: 10px;
   padding-right: 10px;
